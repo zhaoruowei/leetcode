@@ -1,0 +1,50 @@
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        // 解法1，栈，时间复杂度O(n),空间复杂度O(n)
+        // if (head == nullptr)
+        // {
+        //     return nullptr;
+        // }
+        // stack<ListNode*> ls;
+        // ListNode *p = head;
+        // while (p != nullptr)
+        // {
+        //     ls.push(p);
+        //     p = p->next;
+        // }
+        // head = ls.top();
+        // ls.pop();
+        // p = head;
+        // while (!ls.empty())
+        // {
+        //     p->next = ls.top();
+        //     ls.pop();
+        //     p = p->next;
+        // }
+        // p->next = nullptr;
+        // return head;
+
+        // 解法2，迭代原地反转,时间复杂度O(n),空间复杂度O(1)
+        // 每一步反转前结点prev和当前结点cur，利用中间变量存储cur->next,cur的next指向cnext，prev指向cur，cur指向中间变量
+        // ListNode *prev = nullptr, *cur = head;
+        // while (cur)
+        // {
+        //     ListNode *cnext = cur->next;
+        //     cur->next = prev;
+        //     prev = cur;
+        //     cur = cnext;
+        // }
+        // return prev;
+
+        // 解法3，递归原地反转,时间复杂度O(n)，空间复杂度O(1)
+        if (!head || !head->next)
+        {
+            return head;
+        }
+        ListNode *newhead = reverseList(head->next);
+        head->next->next = head;
+        head->next = nullptr;
+        return newhead;
+    }
+};
