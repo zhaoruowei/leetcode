@@ -24,7 +24,7 @@ public:
     // 想让0-i有序
     for (int i = 1; i < n; ++i)
     {
-      for (int j = i-1; j > 0 && nums[j] > nums[j+1]; --j)
+      for (int j = i-1; j >= 0 && nums[j] > nums[j+1]; --j)
       {
         swap(nums[j], nums[j+1]);
       }
