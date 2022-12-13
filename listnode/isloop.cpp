@@ -26,7 +26,7 @@ class sloution
 {
 public:
 	// hashset辅助，一次循环，时间O(n)空间O(n)
-	ListNode* isloop(ListNode* head, ListNode* tail) // 返回值为入环结点，head为头结点，tail为链表判断的终止结点，无特殊要求是tail为nullptr
+	ListNode* isloop(ListNode* head) // 返回值为入环结点，head为头结点
 	{
 		if (!head || !head->next || !head->next->next)
 		{
@@ -35,7 +35,7 @@ public:
 		unordered_set<ListNode*> hashset;
 		// 遍历链表
 		ListNode* cur = head;
-		while (cur != tail)
+		while (cur)
 		{
 			if (hashset.find(cur) == hashset.end()) // set中无当前结点
 			{
@@ -51,7 +51,7 @@ public:
 		return nullptr;
 	}
 	// 快慢指针，两次循环，时间O(n),空间O(1)
-	ListNode* hasloop(ListNode* head, ListNode* tail)
+	ListNode* hasloop(ListNode* head)
 	{
 		if (!head || !head->next || !head->next->next)
 		{
@@ -64,7 +64,7 @@ public:
 		while (fast != slow)
 		{
 			// 如果fast走到结尾结点，表示无环
-			if (fast->next == tail || fast->next->next == tail)
+			if (!fast->next || !fast->next->next)
 			{
 				return nullptr;
 			}
