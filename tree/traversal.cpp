@@ -85,7 +85,7 @@ public:
 	        }
 	    }
 	}
-	// 后续递归
+	// 后序递归
 	void postOrder(TreeNode* root)
 	{
 	    if (!root)
@@ -94,9 +94,9 @@ public:
 	    }
 	    postOrder(root->left);
 	    postOrder(root->right);
-	    cout << root->val << end;
+	    cout << root->val << endl;
 	}
-	// 后续迭代
+	// 后序迭代
 	void postOrderIteration(TreeNode* root)
 	{
 	    if (!root)
@@ -119,6 +119,24 @@ public:
 	        TreeNode* cur = list2.top();
 	        list2.pop();
 	        cout << cur->val << endl;
+	    }
+	}
+	// 广度优先遍历（层序遍历）
+	void bfs(TreeNode* root)
+	{
+	    if (!root)
+	    {
+	        return;
+	    }
+	    queue<TreeNode*> list;
+	    list.emplace(root);
+	    while (!list.empty())
+	    {
+	        TreeNode* cur = list.front();
+	        list.pop();
+	        cout << cur->val << endl;
+	        if (cur->left) list.emplace(cur->left);
+	        if (cur->right) list.emplace(cur->right);
 	    }
 	}
 };
