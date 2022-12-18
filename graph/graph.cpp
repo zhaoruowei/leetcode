@@ -266,11 +266,61 @@ private:
             return edge1->weight > edge2->weight;
         }    
     };
+public:
+    // prim算法最小生成树，从点出发，适用于无向图
+    vector<Edge*> primMST(Graph* graph)
+    {
+        vector<Edge*> ans;
+
+        // 优先级队列，小顶堆
+        priority_queue<Edge*, vector<Edge*>, mycmp> edgequeue;
+        // 点的集合，将遍历过的点加入
+        unordered_set<Node*> visited;
+
+        // 遍历图中的所有点，有的点可能不相连，生成森林
+        for (auto [_1, node] : graph->nodes)
+        {
+            // 判断当前点是否在set中
+            if (visited.find(node) == visited.end())
+            {
+                // 将当前点加入set
+                visited.emplace(node);
+                // 遍历当前点的所有边
+                for (auto edge : node->edges)
+                {
+                    // 将所有边加入小顶堆
+                    edgequeue.push(edge);
+                }
+                // 依次弹出边
+                while (!edgequeue.empty())
+                {
+                    Edge* edge = edgequeue.top();
+                    edgequeue.pop();
+                    // 获取当前边的点
+                    Node* to = edge->to;
+                    // 判断两个点是否在visited中
+                    if (visited.find(to) == visited.end()) // 不在set中
+                    {
+                        visited.emplace(to);
+                        ans.emplace_back(edge);
+                        // 将当前点的边加入队列
+                        for (auto newedge : to->edges)
+                        {
+                            edgequeue.emplace(newedge);
+                        }
+                    }
+                }
+            }
+        }
+        return ans;
+    }
 };
 
 
 void inputData(int n, vector<vector<int>>& matrix)
 {
+    // 存储无向图时，将数据复制一份调转matrix[0][1] 和matrix[0][2]
+    // 即一条无向边相当于两条相反的有向边
     int m = 0;
     cout << "输入矩阵行数：" << endl;
     cin >> m;
