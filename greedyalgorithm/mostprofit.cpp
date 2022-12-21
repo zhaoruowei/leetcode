@@ -59,6 +59,49 @@ public:
         }
         return ans;
     }
+    // 优化，使用小根堆结构，维护最小花费搜索
+    vector<int> mostprofitup(vector<int> costs, vector<int> profits, int k, int m)
+    {
+        vector<int> ans;
+        int cn = costs.size();
+        int pn = profits.size();
+        if (!cn || !pn || cn != pn || !k)
+        {
+            return ans;
+        }
+        // 按收益排序的大顶堆,pair.first是项目编号，pair.second是项目收益
+        priority_queue<pair<int, int>, vector<pair<int, int>>, lesscmp> profitheap;
+        // 按花费排序的小根堆，pair.first是项目编号，pair.second是项目花费
+        priority_queue<pair<int, int>, vector<pair<int, int>>, grecmp> costheap;
+        // 将所有项目按花费大小入小顶堆
+        for (int i = 0; i < cn; ++i)
+        {
+            costheap.emplace(make_pair(i, costs[i]));
+        }
+        // 当前金额
+        int cur = m;
+        // 按项目执行次数循环
+        for (int i = 0; i < k; ++i)
+        {
+            // 解锁当前金额可以做的项目
+            while (!costheap.empty() && cur >= costheap.top().second) // heap中还有没解锁的项目，当前资金可以解锁
+            {
+                // 弹出解锁的项目进入按收益排序的大根堆
+                profitheap.emplace(make_pair(costheap.top().first, profits[costheap.top().first]));
+                costheap.pop();
+            }
+            // 选择收益最大的项目开始做
+            if (!profitheap.empty())
+            {
+                pair<int, int> program = profitheap.top();
+                profitheap.pop();
+                cur += program.second;
+                ans.emplace_back(program.first+1);
+            }
+        }
+
+        return ans;
+    }
 private:
     struct lesscmp
     {
@@ -67,7 +110,13 @@ private:
             return a.second < b.second;
         }
     };
-    
+    struct grecmp
+    {
+        bool operator()(pair<int, int> a, pair<int, int> b)
+        {
+            return a.second > b.second;
+        }
+    };
 };
 
 int main()
@@ -79,7 +128,8 @@ int main()
     int m = 1;
     vector<int> ans;
     sloution s;
-    ans = s.mostprofit(costs, profits, k, m);
+    // ans = s.mostprofit(costs, profits, k, m);
+    ans = s.mostprofitup(costs, profits, k, m);
     for (int i = 0; i < ans.size(); ++i)
     {
         cout << ans[i] << endl;
