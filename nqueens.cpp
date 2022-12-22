@@ -92,6 +92,90 @@ private:
         // 通过检查1，2，返回true，row行j列可以摆Q
         return true;
     }
+public:
+    // 利用位运算降低常树时间，不能超过32皇后，int32位
+    vector<vector<string>> solveNQueens2(int n)
+    {
+        // 保存所有可行的结果集合
+        vector<vector<string>> ans;
+        // 函数边界值检查
+        if (n < 1 || n > 32)
+        {
+            return ans;
+        }
+
+        // 定义每一行摆放的初始结构res,初始每一行都是空位，即全是'.'
+        string res;
+        for (int i = 0; i < n; ++i)
+        {
+            res.push_back('.');
+        }
+        // 保存每一层的摆放结果，如果n个字符串都能摆上Q，就是一种可行的摆放方案，存入ans中
+        vector<string> record(n, res); // 存放的string是每一层的结果，初始共n个res
+
+        // 使用整数的二进制数记录Q的摆放
+        // 取一个32整数的二进制表达形式，即32个1，n皇后就是低位的n个位置为0，其他高位为1，0位置表示可以存放Q
+        // n为32时，32位都为0，都可以摆放
+        // 当n == 8时，1为0000,0000,0000,0000,0000,0000,0000,0001 左移n位相当于低位的n个位置为0
+        // 0000,0000,0000,0000,0000,0001,0000,0000  -1等于+(-1)
+        // 1111,1111,1111,1111,1111,1111,1111,1111
+        // 0000,0000,0000,0000,0000,0000,1111,1111
+        // 当n=32时，limit为-1，即1111,1111,1111,1111,1111,1111,1111,1111
+        // 表示初始的限制，1位不能摆放Q
+        int limit = n == 32 ? -1 : (1 << n) - 1;
+        // 调用递归函数从第row行开始摆放Q
+        // limit为初始的棋盘，collimit,leftlimit,rightlimit分别表示列限制，左斜线限制，右斜线限制
+        // 初始第一行可以在任意列摆放，所以所有限制都是0
+        cout << process2(limit, 0, 0, 0, 0, n, record, ans) << endl;
+
+        return ans;
+    }
+private:
+    // 利用位运算降低常数时间
+    int process2(int limit, int collimit, int leftlimit, int rightlimit, int row, int n, vector<string>& record, vector<vector<string>>& ans)
+    {
+        // limit为限制，二进制为1的位置不能摆Q，为0的才可以摆放
+        // 每行的摆放结果将是一个二进制数，1位置为摆放的位置
+        // 如果列限制和limit相等，即任何一列都不能摆放Q时，退出，结算
+        if (collimit == limit) // collimit = 为n个1
+        {
+            ans.emplace_back(record);
+            return 1;
+        }
+
+        // 记录当前层可行的方案次数
+        int count = 0;
+
+        // 根据4个limit算出当前行可以填Q的位置
+        int rowlimit = (collimit | leftlimit | rightlimit); // 只要有为1的位置就为1，不能填Q，1110，0000
+        int pos = limit & ~(rowlimit); // 得到该层所有可以填Q的位置，0001，1111
+        // 依次取最右边的1，进行下一层递归
+        while (pos != 0) // 没有取完1
+        {
+            int mostRightone = pos & (~pos+1); // 0000,0001,最右边的1，就是这次遍历到的可以放Q的位置, 每次递归当前层都会改变most的值
+            pos = pos - mostRightone; // 1111,1110当前行的摆放结果
+
+            // 将mostRightone位的.修改为Q，0000，0001转变为7:0000,0111
+            // 找出1在mostRightone的第几位，mostRightone右移m位等于0
+            int temp = mostRightone;
+            int m = 0;
+            while (temp)
+            {
+                temp = temp >> 1;
+                ++m;
+            }
+
+            record[row][n-m] = 'Q';
+
+            // 算出下一行的限制，进行下一行的递归
+            count += process2(limit, (collimit | mostRightone), (leftlimit | mostRightone) << 1, (rightlimit | mostRightone) >> 1, row+1, n, record, ans);
+
+            // 重置当前行在record中的记录
+            // 将mostRightone位的.修改为.
+            record[row][n-m] = '.';
+        }
+        return count;
+    }
 };
 
 void printAns(vector<vector<string>>& ans)
@@ -123,16 +207,39 @@ void testNQueenProcess1(int n)
     QueryPerformanceCounter(&start);
     ans = s.solveNQueens(n);
     QueryPerformanceCounter(&end);
-    // printAns(ans);
+    // 打印结果
+    printAns(ans);
     // cout.precision(6);
     cout << "process1函数运行时间为：" << ((double)(end.QuadPart-start.QuadPart)/(double)tc.QuadPart)*1000 << "ms" << endl;
+}
+
+void testNQueenProcess2(int n)
+{
+    sloution s;
+    vector<vector<string>> ans;
+    cout << n << "Q test:";
+    cout << "函数输出结果个数：";
+    // 计时
+    LARGE_INTEGER start, end, tc;
+    QueryPerformanceFrequency(&tc);
+    QueryPerformanceCounter(&start);
+    ans = s.solveNQueens2(n);
+    QueryPerformanceCounter(&end);
+    // 打印结果
+    printAns(ans);
+    // cout.precision(6);
+    cout << "process2函数运行时间为：" << ((double)(end.QuadPart-start.QuadPart)/(double)tc.QuadPart)*1000 << "ms" << endl;
 }
 
 int main()
 {
     cout << "N皇后问题测试" << endl;
     
-    testNQueenProcess1(12);
+    testNQueenProcess1(5);
+
+    cout << "=================================" << endl;
+
+    testNQueenProcess2(5);
     
     return 0;
 }
