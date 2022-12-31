@@ -6,6 +6,7 @@
 正负数的切换： n ==> (~n+1)
 取出最低位的数 n & 1 ===》 循环取出最低位 while (n!=0) lowbit = n&1; n = n>>1;
 无符号右移，n = (unsigned int)n >> 1;高位补0
+取余操作n%m = n & (m-1)
 */
 
 #include <iostream>
@@ -66,12 +67,30 @@ public:
         {
             if ((a >> i) >= b)
             {
-                a = add((a >> i), add(~b, 1));
-                sum = add(sum, (1 << i));
+                sum |= (1 << i); // b能够被a减，代表这个位置有因子
+                a = add(a, add(~(b << i), 1));
             }
         }
 
         return (signa == signb) ? sum : add(~sum, 1);
+    }
+    int mod(int a, int b)
+    {
+        if (a == 0) return 0;
+        if (b == 0) return INT_MIN; // 不合法
+        int signa = ((a >> 31) & 1);
+        int signb = ((b >> 31) & 1);
+        a = signa ? add(~a, 1) : a;
+        b = signb ? add(~b, 1) : b;
+        for (int i = 31; i > -1; --i)
+        {
+            if ((a >> i) > b)
+            {
+                a = add(a, add(~(b<<i), 1)); // 除法
+            }
+        }
+        // 除掉所有因子，剩下的不能减去b的就是余数
+        return a;
     }
 };
 
@@ -81,10 +100,11 @@ int main()
     srand((unsigned int)time(0));
     BitCalculate bitcal;
     int a = rand() % INT_MAX, b = rand() % INT_MAX;
-    // a = 27; b = -6;
+    a = 1024; b = 12;
     cout << a << " + " << b <<" = " << bitcal.add(a, b) << " == " << (a+b) << endl;
     cout << a << " - " << b <<" = " << bitcal.minus(a, b) << " == " << (a-b) << endl;
     cout << a << " * " << b <<" = " << bitcal.times(a, b) << " == " << (a*b) << endl;
     cout << a << " / " << b <<" = " << bitcal.divided(a, b) << " == " << (a/b) << endl;
+    cout << a << " % " << b <<" = " << bitcal.mod(a, b) << " == " << (a%b) << endl;
     return 0;
 }
